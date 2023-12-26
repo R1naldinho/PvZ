@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parabola Animation</title>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="1000" height="1000"></canvas>
+
+    <script>
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        const CellSize = 100;
+        const speedZ = 0.5;
+        const speedPro = 1;
+
+        // Genera punti casuali P e Z
+        // Genera punti casuali P e Z
+        const P = { x: Math.random() * 500, y: Math.random() * 900 + 100 };
+        const Z = { x: P.x + Math.random() * 200 + 300, y: P.y };
+        let Q = { x: P.x, y: P.y }
+        let Z1 = { x: Z.x, y: Z.y };
+
+
+        // Calcola le coordinate del vertice V
+        function calculateY(x, a, b, c) {
+            return a * Math.pow(x, 2) + b * x + c;
+        }
+
+
+        // Funzione per disegnare la parabola e i punti P, V, Z e Q sul canvas
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const V = {
+                x: (P.x + Z.x) / 2,
+                y: P.y - CellSize
+            };
+
+            // Risolvi il sistema di equazioni per trovare i coefficienti della parabola
+            const a = (Z.y - P.y + CellSize) / Math.pow(Z.x - V.x, 2);
+            const b = -2 * a * V.x;
+            const c = P.y - a * Math.pow(P.x, 2) - b * P.x;
+
+            // Funzione per calcolare la coordinata y data una coordinata x
+
+            // Disegna la parabola
+            ctx.beginPath();
+            for (let x = 0; x <= 1000; x += 10) {
+                const y = calculateY(x, a, b, c);
+                ctx.lineTo(x, y);
+            }
+            ctx.strokeStyle = 'blue';
+            ctx.stroke();
+
+            // Disegna i punti P, V e Z
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(P.x, P.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = 'green';
+            ctx.beginPath();
+            ctx.arc(V.x, V.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = 'blue';
+            ctx.beginPath();
+            ctx.arc(Z.x, Z.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Calcola la posizione di Q sulla parabola e disegna il punto Q
+
+            ctx.fillStyle = 'yellow';
+            ctx.beginPath();
+            ctx.arc(Q.x, Q.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+
+            ctx.fillStyle = 'purple';
+            ctx.beginPath();
+            ctx.arc(Z1.x, Z1.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+
+
+            Z.x -= speedZ; // Modifica la velocità di Q
+            Q.x += speedPro
+            Q.y = calculateY(Q.x, a, b, c)
+
+            // Richiede il prossimo frame di animazione
+
+            requestAnimationFrame(draw);
+        }
+
+        // Avvia il disegno
+        draw();
+    </script>
+</body>
+
+</html>

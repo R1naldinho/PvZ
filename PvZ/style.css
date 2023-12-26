@@ -1,0 +1,95 @@
+body {
+    background: antiquewhite !important;
+    overflow: hidden;
+}
+
+#canvas1 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 900px;
+    height: 600px;
+    background: lime;
+    font-family: 'Orbitron', sans-serif;
+    box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1); 
+    border: black 5px solid;
+    border-radius: 15px;
+}
+
+#sidebar {
+    width: 200px; 
+    overflow-y: auto; 
+    background-color: oldlace;
+    padding: 10px;
+    position: absolute;
+    top: 0;
+    left: 0; 
+    height: 100%;
+    box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1); 
+}
+
+#sidebar h2 {
+    margin-bottom: 10px;
+}
+
+.defender-card {
+    width: 150px !important;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+    margin-bottom: 10px;
+    background-color: beige;
+    border: rgb(220, 220, 124) 3px solid;
+    border-radius: 5px;
+}
+
+.defender-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.defender-card.selected {
+    border: goldenrod 5px solid;
+}
+
+.not-clickable {
+    pointer-events: none;
+    opacity: 0.5; 
+    background-color: #888;
+}
+
+.progress{
+    background-color: beige !important;
+}
+
+.progress-bar::before {
+    content: ''; 
+    display: block;
+    height: 100%;
+    background-color: goldenrod; 
+    transition: width 1s ease; 
+}
+
+.hide {
+    display: none;
+}
+
+.fixed-defender {
+    position: sticky;
+    top: 0;
+}
+
+#sidebar::-webkit-scrollbar {
+    width: 8px; 
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background-color: #888; 
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background-color: #f1f1f1; 
+}

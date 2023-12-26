@@ -904,7 +904,7 @@ class Pianta1 extends Defender {
 }
 
 class Cavolpulta extends Defender {
-    constructor(x, y, health = 150, cost = 100, img = './image/plants/CavolPulta/CavolPulta.png') {
+    constructor(x, y, health = 150, cost = 100, img = './image/plants/Cavolpulta/CavolPulta.png') {
         super(x, y, health, cost, img);
         this.power = 0;
         this.projectileSpeed = 5;
@@ -914,7 +914,7 @@ class Cavolpulta extends Defender {
 
         this.xOffsetProjectile = +50;
         this.yOffsetProjectile = -50;
-        this.projectileImage = "./image/plants/CavolPulta/Projectile.png";
+        this.projectileImage = "./image/plants/Cavolpulta/Projectile.png";
         this.projectileWidth = 20;
         this.projectileHeight = 20;
 

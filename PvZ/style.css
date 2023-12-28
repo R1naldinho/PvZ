@@ -9,7 +9,6 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 900px;
-    height: 600px;
     background: lime;
     font-family: 'Orbitron', sans-serif;
     box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1); 

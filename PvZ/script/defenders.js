@@ -1,16 +1,18 @@
 // projectiles
-import { ctx, canvas, cellSize, cellGap, enemies, enemyPositions, collision, resources } from './main.js';
+import { ctx, canvas, cellSize, cellGap, enemies, enemyPositions, collision, resources, mouse } from './main.js';
 import { projectiles, defenders } from "./main.js"
 
 
 export { Projectile, handleProjectiles, Defender, handleDefenders, createDefender };
 
 class Projectile {
-    constructor(parents, x, y, trajectoryFunction, power = 25, imageSrc, maxDistance = Infinity) {
+    constructor(parents, x, y, trajectoryFunction, power = 25, imageSrc, maxDistance = Infinity, time = Infinity) {
         this.parents = parents
         this.initialX = x;
         this.initialY = y;
         this.maxDistance = maxDistance;
+        this.time = time
+        this.timer = 0
 
         this.x = x;
         this.y = y;
@@ -32,6 +34,7 @@ class Projectile {
     }
 
     update() {
+        this.timer++
         const newPosition = this.trajectoryFunction(this.x, this.y);
         this.x = newPosition.x;
         this.y = newPosition.y;
@@ -39,6 +42,10 @@ class Projectile {
         const distance = Math.sqrt((this.x - this.initialX) ** 2 + (this.y - this.initialY) ** 2);
 
         if (distance >= this.maxDistance) {
+            this.remove = true;
+        }
+
+        if (this.timer >= this.time) {
             this.remove = true;
         }
     }
@@ -53,6 +60,12 @@ function handleProjectiles() {
     for (let i = 0; i < projectiles.length; i++) {
         projectiles[i].update();
         projectiles[i].draw();
+
+        if (projectiles[i].remove) {
+            projectiles.splice(i, 1);
+            i--;
+            continue;
+        }
 
         if (projectiles[i].x + + projectiles[i].width < 0 || projectiles[i].x > canvas.width || projectiles[i].y + projectiles[i].height < -100 || projectiles[i].y > canvas.height) {
             projectiles.splice(i, 1);
@@ -397,7 +410,7 @@ class SparasemiDellEraGlaciale extends Sparasemi {
 
 class PiantaDaHacker extends Sparasemi {
     constructor(x, y) {
-        super(x, y, Infinity, 0, './image/plants/PiantaDaHacker/PiantaDaHacker.jpg')
+        super(x, y, Infinity, 0, './image/plants/PiantaDaHacker/PiantaDaHacker.png')
         this.power = 75;
         this.projectileSpeed = 15;
         this.shootingFrequency = 10;
@@ -413,7 +426,22 @@ class PiantaDaHacker extends Sparasemi {
 
 
     randProjectile() {
-        let imageArray = ["./image/plants/DiamondCactus/DiamondCactus.png", "./image/plants/Cactus/Cactus.png", './image/plants/Ciliegie/Ciliege.png', './image/plants/Girasole/Girasole.png']
+        let imageArray = [
+            './image/plants/Cactus/Cactus.png',
+            './image/plants/Cavolbotto/Cavolbotto.png',
+            './image/plants/Cavolpulta/Cavolpulta.png',
+            './image/plants/Ciliegie/Ciliegie.png',
+            './image/plants/DiamondCactus/DiamondCactus.png',
+            './image/plants/Girasole/Girasole.png',
+            './image/plants/Noce/Noce.png',
+            './image/plants/Pianta1/Pianta1.png',
+            './image/plants/PiantaDaHacker/PiantaDaHacker.png',
+            './image/plants/Rovo/Rovo.png',
+            './image/plants/Sparasemi/Sparasemi.png',
+            './image/plants/SparasemiDellEraGlaciale/SparasemiDellEraGlaciale.png',
+            './image/plants/SparasemiInfuocato/SparasemiInfuocato.png',
+
+        ]
         this.projectileImage = imageArray[Math.floor(Math.random() * imageArray.length)]
     }
 
@@ -433,9 +461,9 @@ class Noce extends Defender {
     }
 }
 
-class Ciliege extends Defender {
+class Ciliegie extends Defender {
     constructor(x, y) {
-        super(x, y, 1, 150, './image/plants/Ciliegie/Ciliege.png');
+        super(x, y, 1, 150, './image/plants/Ciliegie/Ciliegie.png');
         this.cooldown = 25000;
         this.enableCollision = false;
         this.collisionFrames = 0;
@@ -915,8 +943,8 @@ class Cavolpulta extends Defender {
         this.xOffsetProjectile = +50;
         this.yOffsetProjectile = -50;
         this.projectileImage = "./image/plants/Cavolpulta/Projectile.png";
-        this.projectileWidth = 20;
-        this.projectileHeight = 20;
+        this.projectileWidth = 50;
+        this.projectileHeight = 50;
 
         this.projectilePower = 35;
 
@@ -924,34 +952,31 @@ class Cavolpulta extends Defender {
         this.targetEnemy
     }
 
-    FindParabolic(P, Z, V) {
-        const a = (V.y + P.y) / (Math.pow(V.x, 2) - P.x * (P.x - 2 * V.x))
+    FindParabolic(P, V) {
+        const a = (P.y) / (Math.pow(P.x, 2) - 2* P.x * V.x + Math.pow(V.x, 2) + V.y)
         const b = -2 * a * (V.x);
-        const c = P.y - a * P.x * (P.x - 2 * V.x)
+        const c = a * Math.pow(V.x, 2) + V.y
         return { a, b, c };
     }
 
     Trajectory(x, points) {
-        const coefficients = this.FindParabolic(points.P, points.Z, points.V);
-        return { x: x + this.projectileSpeed, y: coefficients.a * x * x + coefficients.b * x + coefficients.c };
+        const coefficients = this.FindParabolic(points.P, points.V);
+        return { x: x + this.projectileSpeed, y: coefficients.a * Math.pow(x + this.projectileSpeed, 2) + coefficients.b * (x + this.projectileSpeed) + coefficients.c };
     }
 
     CheckProjectile() {
         for (let i = 0; i < projectiles.length; i++) {
             if (projectiles[i].parents == this) {
+                if(collision(projectiles[i], this.targetEnemy)){
+                    projectiles[i].piercingNumber = 0
+                    this.targetEnemy.health -= this.projectilePower
+                    projectiles[i].remove = true
+                }
 
-                if (projectiles[i].y + projectiles[i].height >= this.y - 2 * cellGap + cellSize) {
+                if (projectiles[i].y + projectiles[i].height >= this.y + cellSize) {
                     projectiles.splice(i, 1);
                     i--;
                     continue;
-                }
-
-                if (projectiles[i].y <= this.y) {
-                    projectiles[i].power = 0;
-                    projectiles[i].piercingNumber = Infinity;
-                } else {
-                    projectiles[i].piercingNumber = 0;
-                    projectiles[i].power = this.projectilePower;
                 }
             }
         }
@@ -963,9 +988,8 @@ class Cavolpulta extends Defender {
         if (this.shooting) {
             this.timer++;
             const P = { x: this.x + (cellSize / 2), y: this.y + (cellSize / 2) };
-            const Z = { x: this.xEnemy + cellSize, y: P.y };
             const V = { x: Math.abs((this.xEnemy - this.x) / 2), y: 0 };
-            const points = { P, Z, V };
+            const points = { P, V };
             if (this.timer % this.shootingFrequency === 0) {
                 const newProjectile = new Projectile(
                     this,
@@ -1013,6 +1037,134 @@ class Cavolpulta extends Defender {
     }
 }
 
+class Bananapulta extends Defender {
+    constructor(x, y, health = 500, cost = 300, img = './image/plants/Banana/FullBanana.png') {
+        super(x, y, health, cost, img);
+        this.power = 500;
+        this.reloadTime = 1000;
+        this.timer = 0;
+        this.shooting = false;
+
+        this.projectileImage = "./image/plants/Banana/Projectile.png";
+        this.projectileWidth = 50;
+        this.projectileHeight = 70;
+
+        this.projectilePower = 35;
+
+        this.xTarget = null;
+        this.yTarget = null;
+
+        this.count = 0;
+
+        this.firstClick = false;
+
+        this.onClickHandler = this.onClick.bind(this);
+
+
+        this.clickedOnThis = false
+
+    }
+
+    drawTarget() {
+        if (this.firstClick) {
+            for (let x = 0; x <= canvas.width - cellSize; x += cellSize) {
+                for (let y = cellSize; y <= canvas.height - cellSize; y += cellSize) {
+                    if ((mouse.x >= x) && (mouse.x <= x + cellSize) && (mouse.y >= y) && (mouse.y <= y + cellSize)) {
+                        ctx.strokeStyle = 'red';
+                        ctx.lineWidth = 10;
+                        ctx.strokeRect(x, y, cellSize, cellSize);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    createProjectile() {
+        const P = { x: this.x + (cellSize / 2), y: this.y + (cellSize / 2) };
+        const T = { x: this.xTarget + (cellSize / 2) - 25, y: this.yTarget + (cellSize / 2) - 35 };
+        const points = { P, T };
+        const newProjectile = new Projectile(
+            this,
+            T.x,
+            T.y,
+            (x, y) => this.Trajectory(x, points),
+            this.power,
+            this.projectileImage,
+            Infinity,
+            30
+        );
+        newProjectile.enablePiercing = true;
+        newProjectile.piercingNumber = Infinity;
+        newProjectile.width = this.projectileWidth;
+        newProjectile.height = this.projectileHeight;
+        projectiles.push(newProjectile);
+
+        this.timer = 0;
+        this.clickable(false)
+        this.clickedOnThis = false;
+    }
+
+
+    Trajectory(x, points) {
+        return { x: points.T.x, y: points.T.y }
+    }
+
+    clickable(value) {
+        if (value) {
+            document.addEventListener('click', this.onClickHandler);
+            this.image.src = './image/plants/Banana/ChargedBanana.png'
+        } else {
+            document.removeEventListener('click', this.onClickHandler);
+            this.image.src = './image/plants/Banana/EmptyBanana.png'
+            this.enabled = false;
+        }
+    }
+
+    onClick(event) {
+        this.count++;
+
+        this.firstClick = true
+        const rect = canvas.getBoundingClientRect();
+        const clickedX = event.clientX - rect.left;
+        const clickedY = event.clientY - rect.top;
+
+        this.xTarget = Math.floor(clickedX / cellSize) * cellSize;
+        this.yTarget = Math.floor(clickedY / cellSize) * cellSize;
+
+        if (this.x - cellGap == this.xTarget && this.y - cellGap == this.yTarget) {
+            this.clickedOnThis = !this.clickedOnThis
+            return
+        }
+
+        if (this.clickedOnThis) {
+            this.createProjectile()
+        }
+
+    }
+
+
+
+
+    handleShootingBehavior() {
+        this.timer++;
+        if (this.timer > this.reloadTime) {
+            this.clickable(true)
+            if (this.enabled) {
+                this.drawTarget()
+
+            }
+        }
+    }
+
+    handleTypeSpecificBehavior() {
+        this.handleShootingBehavior()
+        if (this.clickedOnThis) {
+            this.drawTarget()
+        }
+    }
+}
+
 function createDefender(x, y, id, resources) {
 
     let newDefender;
@@ -1044,8 +1196,8 @@ function createDefender(x, y, id, resources) {
             break;
         }
 
-        case "Ciliege": {
-            newDefender = new Ciliege(x, y);
+        case "Ciliegie": {
+            newDefender = new Ciliegie(x, y);
             break;
         }
 
@@ -1075,6 +1227,10 @@ function createDefender(x, y, id, resources) {
         }
         case "Cavolpulta": {
             newDefender = new Cavolpulta(x, y);
+            break;
+        }
+        case "Bananapulta": {
+            newDefender = new Bananapulta(x, y);
             break;
         }
 

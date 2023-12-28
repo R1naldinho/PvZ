@@ -9,9 +9,9 @@ export const ctx = canvas.getContext('2d');
 
 
 // global variables
-export const cellSize = 100;
+export const cellSize = canvas.width/9;
 export const cellGap = 3;
-export let numberOfResources = { numberOfResources: Infinity };
+export let numberOfResources = { numberOfResources: 10000000 };
 export let enemiesInterval = { enemiesInterval: 600 };
 export let frame = { frame: 0 };
 export let gameOver = { gameOver: false };
@@ -41,6 +41,9 @@ canvas.addEventListener('mouseleave', function () {
     mouse.y = undefined;
     mouse.y = undefined;
 });
+
+
+
 
 // game board
 const controlsBar = {
@@ -180,15 +183,21 @@ function createDefenderOption(defenderType, imagePath, cost) {
     option.className = 'col-lg-4 col-md-6 col-sm-12 defender-card';
     option.setAttribute('data-type', defenderType);
 
+    const nameText = document.createElement('div');
+    nameText.textContent = `${defenderType}`;
+    option.appendChild(nameText);
+
     const image = document.createElement('img');
     image.src = imagePath;
     image.alt = defenderType;
     image.className = 'defender-image';
     option.appendChild(image);
 
-    const costText = document.createElement('div');
-    costText.textContent = `Cost: ${cost}`;
-    option.appendChild(costText);
+    if(defenderType != "Pala"){
+        const costText = document.createElement('div');
+        costText.textContent = `Cost: ${cost}`;
+        option.appendChild(costText);
+    }
 
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress';
@@ -241,9 +250,9 @@ function setupSidebar() {
     createDefenderOption('Sparasemi', './image/plants/Sparasemi/Sparasemi.png', 100);
     createDefenderOption('Sparasemi Infuocato', './image/plants/SparasemiInfuocato/SparasemiInfuocato.png', 200);
     createDefenderOption("Sparasemi Dell'Era Glaciale", './image/plants/SparasemiDellEraGlaciale/SparasemiDellEraGlaciale.png', 125);
-    createDefenderOption("Pianta da Hacker", './image/plants/PiantaDaHacker/PiantaDaHacker.jpg', 0);
+    createDefenderOption("Pianta da Hacker", './image/plants/PiantaDaHacker/PiantaDaHacker.png', 0);
     createDefenderOption('Noce', './image/plants/Noce/Noce.png', 50);
-    createDefenderOption('Ciliege', './image/plants/Ciliegie/Ciliege.png', 150);
+    createDefenderOption('Ciliegie', './image/plants/Ciliegie/Ciliegie.png', 150);
     createDefenderOption('Girasole', './image/plants/Girasole/Girasole.png', 50);
     createDefenderOption('Rovo', './image/plants/Rovo/Rovo.png', 125);
     createDefenderOption('Cavolbotto', './image/plants/Cavolbotto/Cavolbotto.png', 125);
@@ -251,6 +260,7 @@ function setupSidebar() {
     createDefenderOption('Cactus di Diamante', './image/plants/DiamondCactus/DiamondCactus.png', 225);
     createDefenderOption('Pianta1', './image/plants/Pianta1/Pianta1.png', 1000);
     createDefenderOption('Cavolpulta', './image/plants/Cavolpulta/Cavolpulta.png', 100);
+    createDefenderOption('Bananapulta', './image/plants/Banana/ChargedBanana.png', 300);
 }
 
 setupSidebar();

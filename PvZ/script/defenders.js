@@ -1137,7 +1137,7 @@ class Bananapulta extends Defender {
             return
         }
 
-        if (this.clickedOnThis) {
+        if (this.clickedOnThis && this.xTarget >= 0 && this.xTarget < canvas.width && this.yTarget >= cellSize && this.yTarget < canvas.height) {
             this.createProjectile()
         }
 

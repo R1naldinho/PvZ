@@ -28,6 +28,7 @@ class Projectile {
         this.piercingNumber = Infinity;
         this.collidedEnemies = [];
 
+        this.canReduceSpeedCatapulte = false;
         this.canReduceSpeed = false;
         this.freezingPercent = 0;
         this.freezingTime = 0;
@@ -361,7 +362,7 @@ class SparasemiDellEraGlaciale extends Sparasemi {
         this.projectileWidth = 60;
         this.projectileHeight = 35;
 
-        this.freezingTime = 1500;
+        this.freezingTime = 75;
         this.freezingPercent = 0.3;
         this.speedNullPercent = 0.1;
     }
@@ -427,9 +428,12 @@ class PiantaDaHacker extends Sparasemi {
 
     randProjectile() {
         let imageArray = [
+            './image/plants/Banana/ChargedBanana.png',
             './image/plants/Cactus/Cactus.png',
+            './image/plants/Cardo/Cardo.png',
             './image/plants/Cavolbotto/Cavolbotto.png',
             './image/plants/Cavolpulta/Cavolpulta.png',
+            './image/plants/Chiccopulta/Chiccopulta.png',
             './image/plants/Ciliegie/Ciliegie.png',
             './image/plants/DiamondCactus/DiamondCactus.png',
             './image/plants/Girasole/Girasole.png',
@@ -454,7 +458,7 @@ class PiantaDaHacker extends Sparasemi {
 class Noce extends Defender {
     constructor(x, y) {
         super(x, y, 4000, 50, './image/plants/Noce/Noce.png');
-        this.cooldown = 20000
+        this.cooldown = 15000
     }
 
     handleTypeSpecificBehavior() {
@@ -682,6 +686,7 @@ class Cavolbotto extends Defender {
 class Cactus extends Defender {
     constructor(x, y, health = 200, cost = 125, img = './image/plants/Cactus/Cactus.png') {
         super(x, y, health, cost, img);
+        this.cooldown = 6000;
         this.collision = false
         this.power = 20;
         this.projectileSpeed = 5;
@@ -764,6 +769,7 @@ class Cactus extends Defender {
 class DiamondCactus extends Cactus {
     constructor(x, y) {
         super(x, y, 200, 225, './image/plants/DiamondCactus/DiamondCactus.png');
+        this.cooldown = 7500;
         this.power = 40;
         this.projectileSpeed = 5.5;
         this.shootingFrequency = 65;
@@ -780,6 +786,7 @@ class DiamondCactus extends Cactus {
 class Pianta1 extends Defender {
     constructor(x, y) {
         super(x, y, 2000, 1000, './image/plants/Pianta1/Pianta1.png');
+        this.cooldown = 15000;
         this.damage = 0.2;
         this.barrier = true;
 
@@ -943,8 +950,8 @@ class Cavolpulta extends Defender {
         this.xOffsetProjectile = +50;
         this.yOffsetProjectile = -50;
         this.projectileImage = "./image/plants/Cavolpulta/Projectile.png";
-        this.projectileWidth = 50;
-        this.projectileHeight = 50;
+        this.projectileWidth = 40;
+        this.projectileHeight = 40;
 
         this.projectilePower = 35;
 
@@ -953,7 +960,7 @@ class Cavolpulta extends Defender {
     }
 
     FindParabolic(P, V) {
-        const a = (P.y) / (Math.pow(P.x, 2) - 2* P.x * V.x + Math.pow(V.x, 2) + V.y)
+        const a = (P.y) / (Math.pow(P.x, 2) - 2 * P.x * V.x + Math.pow(V.x, 2) + V.y)
         const b = -2 * a * (V.x);
         const c = a * Math.pow(V.x, 2) + V.y
         return { a, b, c };
@@ -967,7 +974,7 @@ class Cavolpulta extends Defender {
     CheckProjectile() {
         for (let i = 0; i < projectiles.length; i++) {
             if (projectiles[i].parents == this) {
-                if(collision(projectiles[i], this.targetEnemy)){
+                if (collision(projectiles[i], this.targetEnemy)) {
                     projectiles[i].piercingNumber = 0
                     this.targetEnemy.health -= this.projectilePower
                     projectiles[i].remove = true
@@ -988,7 +995,7 @@ class Cavolpulta extends Defender {
         if (this.shooting) {
             this.timer++;
             const P = { x: this.x + (cellSize / 2), y: this.y + (cellSize / 2) };
-            const V = { x: Math.abs((this.xEnemy - this.x) / 2), y: 0 };
+            const V = { x: P.x + Math.abs((this.targetEnemy.x) - P.x) / 2, y: 10 };
             const points = { P, V };
             if (this.timer % this.shootingFrequency === 0) {
                 const newProjectile = new Projectile(
@@ -1037,9 +1044,104 @@ class Cavolpulta extends Defender {
     }
 }
 
+class Chiccopulta extends Cavolpulta {
+    constructor(x, y, health = 200, cost = 100, img = './image/plants/Chiccopulta/Chiccopulta.png') {
+        super(x, y, health, cost, img);
+        this.power = 0;
+        this.projectileSpeed = 6;
+        this.shootingFrequency = 90;
+        this.timer = 0;
+        this.shooting = false;
+
+        this.xOffsetProjectile = +50;
+        this.yOffsetProjectile = -50;
+        this.projectileImage = "./image/plants/Chiccopulta/Projectile.png";
+        this.projectileWidth = 50;
+        this.projectileHeight = 50;
+
+        this.projectilePower = 20;
+        this.addictionalProjectilePower = 7;
+        this.speedNullPercent = 0.2;
+        this.freezingTime = 100
+
+    }
+
+    handleFreezing() {
+        const percent = Math.random();
+        if (percent <= this.speedNullPercent) {
+            return 1
+        }
+
+        return this.freezingPercent;
+    }
+
+    handleShootingBehavior() {
+        if (this.shooting) {
+            this.timer++;
+            const P = { x: this.x + (cellSize / 2), y: this.y + (cellSize / 2) };
+            const V = { x: P.x + Math.abs((this.targetEnemy.x) - P.x) / 2, y: 0 };
+            const points = { P, V };
+            if (this.timer % this.shootingFrequency === 0) {
+                const newProjectile = new Projectile(
+                    this,
+                    this.x + this.xOffsetProjectile,
+                    this.y + this.yOffsetProjectile,
+                    (x, y) => this.Trajectory(x, points),
+                    this.power,
+                    this.projectileImage
+                );
+                newProjectile.enablePiercing = true;
+                newProjectile.piercingNumber = Infinity;
+                newProjectile.width = this.projectileWidth;
+                newProjectile.height = this.projectileHeight;
+
+                if (this.handleFreezing() == 1) {
+                    newProjectile.image.src = "./image/plants/Chiccopulta/Butter.png"
+                    newProjectile.canReduceSpeedCatapulte = true
+                }
+
+                projectiles.push(newProjectile);
+            }
+        } else {
+            this.timer = 0;
+        }
+
+
+    }
+
+    CheckProjectile() {
+        for (let i = 0; i < projectiles.length; i++) {
+            if (projectiles[i].parents == this) {
+                if (collision(projectiles[i], this.targetEnemy)) {
+                    this.targetEnemy.health -= this.projectilePower
+                    if (projectiles[i].canReduceSpeedCatapulte) {
+                        this.targetEnemy.health -= this.addictionalProjectilePower
+                        this.targetEnemy.reduceSpeed(1, this.freezingTime)
+                    }
+                    projectiles[i].piercingNumber = 0
+                    projectiles[i].remove = true
+                }
+
+                if (projectiles[i].y + projectiles[i].height >= this.y + cellSize) {
+                    projectiles.splice(i, 1);
+                    i--;
+                    continue;
+                }
+            }
+        }
+    }
+
+    handleTypeSpecificBehavior() {
+        super.findNearestEnemy()
+        this.handleShootingBehavior()
+        this.CheckProjectile()
+    }
+}
+
 class Bananapulta extends Defender {
     constructor(x, y, health = 500, cost = 300, img = './image/plants/Banana/FullBanana.png') {
         super(x, y, health, cost, img);
+        this.cooldown = 10000;
         this.power = 500;
         this.reloadTime = 1000;
         this.timer = 0;
@@ -1165,6 +1267,114 @@ class Bananapulta extends Defender {
     }
 }
 
+class Cardo extends Defender {
+    constructor(x, y, health = 500, cost = 350, img = './image/plants/Cardo/Cardo.png') {
+        super(x, y, health, cost, img);
+        this.power = 0;
+        this.projectileSpeed = 5;
+        this.shootingFrequency = 60;
+        this.timer = 0;
+        this.shooting = false;
+
+        this.xOffsetProjectile = +50;
+        this.yOffsetProjectile = -50;
+        this.projectileImage = "./image/plants/Cardo/Projectile.png";
+        this.projectileWidth = 40;
+        this.projectileHeight = 40;
+
+        this.projectilePower = 20;
+
+        this.xEnemy
+        this.targetEnemy
+    }
+
+    FindLine(P, T) {
+        const m = (P.y - T.y) / (P.x - T.x)
+        const q = P.y - m * P.x
+        return { m, q };
+    }
+
+    FindDirection(P, T){
+        if(P.x <= T.x){
+            return 1
+        }else{
+            return -1
+        }
+    }
+
+    Trajectory(x, points) {
+        const coefficients = this.FindLine(points.P, points.T);
+        const direction = this.FindDirection(points.P, points.T)
+        const next_x = x + (this.projectileSpeed) * direction
+        return { x: next_x, y: coefficients.m * next_x + coefficients.q };
+    }
+
+    CheckProjectile() {
+        for (let i = 0; i < projectiles.length; i++) {
+            if (projectiles[i].parents == this) {
+                if (collision(projectiles[i], this.targetEnemy)) {
+                    projectiles[i].piercingNumber = 0
+                    this.targetEnemy.health -= this.projectilePower
+                    projectiles[i].remove = true
+                }
+            }
+        }
+    }
+
+
+
+    handleShootingBehavior() {
+        if (this.shooting) {
+            this.timer++;
+            const P = { x: this.x + (cellSize / 2), y: this.y + (cellSize / 2) };
+            const T = { x: this.targetEnemy.x + (cellSize / 2), y: this.targetEnemy.y + (cellSize / 2) };
+            const points = { P, T };
+            if (this.timer % this.shootingFrequency === 0) {
+                const newProjectile = new Projectile(
+                    this,
+                    this.x + this.xOffsetProjectile,
+                    this.y + this.yOffsetProjectile,
+                    (x, y) => this.Trajectory(x, points),
+                    this.power,
+                    this.projectileImage
+                );
+                newProjectile.enablePiercing = true;
+                newProjectile.piercingNumber = Infinity;
+                newProjectile.width = this.projectileWidth;
+                newProjectile.height = this.projectileHeight;
+                projectiles.push(newProjectile);
+            }
+        } else {
+            this.timer = 0;
+        }
+    }
+
+    findNearestEnemy() {
+        if (enemies.length > 0) {
+            let enemiesX = [];
+            for (let i = 0; i < enemies.length; i++) {
+                enemiesX.push(enemies[i]);
+            }
+
+            if (enemiesX.length > 0) {
+                enemiesX.sort((a, b) => a.x - b.x);
+
+                this.xEnemy = enemiesX[0].x;
+                this.targetEnemy = enemiesX[0];
+                this.shooting = true;
+            }
+        }
+    }
+
+
+
+    handleTypeSpecificBehavior() {
+        this.findNearestEnemy()
+        this.handleShootingBehavior()
+        this.CheckProjectile()
+    }
+}
+
 function createDefender(x, y, id, resources) {
 
     let newDefender;
@@ -1229,8 +1439,16 @@ function createDefender(x, y, id, resources) {
             newDefender = new Cavolpulta(x, y);
             break;
         }
+        case "Chiccopulta": {
+            newDefender = new Chiccopulta(x, y);
+            break;
+        }
         case "Bananapulta": {
             newDefender = new Bananapulta(x, y);
+            break;
+        }
+        case "Cardo": {
+            newDefender = new Cardo(x, y);
             break;
         }
 

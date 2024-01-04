@@ -56,14 +56,13 @@ class Cell {
         this.y = y;
         this.width = cellSize;
         this.height = cellSize;
-        this.color = color; // Aggiunto il colore come parametro
+        this.color = color; 
     }
 
     draw() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
-        // Aggiunto il bordo nero solo se il mouse è sopra la cella
         if (mouse.x && mouse.y && collision(this, mouse)) {
             ctx.strokeStyle = 'black';
             ctx.strokeRect(this.x, this.y, this.width, this.height);
@@ -74,7 +73,6 @@ class Cell {
 function createGrid() {
     for (let y = cellSize; y < canvas.height; y += cellSize) {
         for (let x = 0; x < canvas.width; x += cellSize) {
-            // Assegna un colore diverso a ciascuna cella
             const color = (x / cellSize + y / cellSize) % 2 === 0 ? '#aad751' : '#91c74b';
             gameGrid.push(new Cell(x, y, color));
         }
@@ -260,7 +258,9 @@ function setupSidebar() {
     createDefenderOption('Cactus di Diamante', './image/plants/DiamondCactus/DiamondCactus.png', 225);
     createDefenderOption('Pianta1', './image/plants/Pianta1/Pianta1.png', 1000);
     createDefenderOption('Cavolpulta', './image/plants/Cavolpulta/Cavolpulta.png', 100);
+    createDefenderOption('Chiccopulta', './image/plants/Chiccopulta/Chiccopulta.png', 100);
     createDefenderOption('Bananapulta', './image/plants/Banana/ChargedBanana.png', 300);
+    createDefenderOption('Cardo', './image/plants/Cardo/Cardo.png', 350);
 }
 
 setupSidebar();

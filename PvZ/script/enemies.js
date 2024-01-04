@@ -23,10 +23,16 @@ class Enemy {
         this.image = new Image();
         this.image.src = './image/zombie/Zombie/Zombie.png';
         this.isFrozen = false;
+        this.freezenTime = 0;
     }
 
     update() {
         this.x -= this.movement;
+        this.handleSpeficicEnemies()
+    }
+
+    handleSpeficicEnemies(){
+        this.reduceSpeed()
     }
 
     draw() {
@@ -54,18 +60,22 @@ class Enemy {
         }
 
 
-        
+
     }
 
-    reduceSpeed(percentage, duration) {
+    reduceSpeed(percentage = 0, duration = 0) {
         this.movement *= (1 - percentage);
+        this.freezenTime += duration
 
-        setTimeout(() => {
+        if (this.freezenTime <= 0) {
             this.movement = this.speed;
             this.isFrozen = false;
-        }, duration);
+            this.freezenTime = 0
+        } else {
+            this.freezenTime--
+            this.isFrozen = true;
+        }
 
-        this.isFrozen = true;
     }
 }
 

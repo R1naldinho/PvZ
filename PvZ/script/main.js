@@ -1,4 +1,4 @@
-import { handleEnemies, Enemy } from "./enemies.js"
+import { handleEnemies, Zombie } from "./enemies.js"
 import { handleDefenders, Defender, createDefender } from "./defenders.js"
 import { handleProjectiles, Projectile } from "./defenders.js"
 import { handleResources, Resource } from "./resources.js"
@@ -9,7 +9,7 @@ export const ctx = canvas.getContext('2d');
 
 
 // global variables
-export const cellSize = canvas.width/9;
+export const cellSize = canvas.width / 9;
 export const cellGap = 3;
 export let numberOfResources = { numberOfResources: 10000000 };
 export let enemiesInterval = { enemiesInterval: 600 };
@@ -56,7 +56,7 @@ class Cell {
         this.y = y;
         this.width = cellSize;
         this.height = cellSize;
-        this.color = color; 
+        this.color = color;
     }
 
     draw() {
@@ -71,6 +71,7 @@ class Cell {
 }
 
 function createGrid() {
+    console.log("createGrid", cellSize, canvas.width, canvas.height)
     for (let y = cellSize; y < canvas.height; y += cellSize) {
         for (let x = 0; x < canvas.width; x += cellSize) {
             const color = (x / cellSize + y / cellSize) % 2 === 0 ? '#aad751' : '#91c74b';
@@ -133,6 +134,10 @@ function handleGameStatus() {
         ctx.fillStyle = 'goldenrod';
         ctx.font = '90px Orbitron';
         ctx.fillText('GAME OVER', 135, 330);
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 5000);
     }
     if (score.score >= winningScore && enemies.length === 0) {
         ctx.fillStyle = 'goldenrod';
@@ -140,10 +145,30 @@ function handleGameStatus() {
         ctx.fillText('LEVEL COMPLETE', 130, 300);
         ctx.font = '30px Orbitron';
         ctx.fillText('You win with ' + score.score + ' points!', 134, 340);
+
+        setTimeout(() => {
+            window.location.href("index.html");
+        }, 5000);
     }
 }
 
-function animate() {
+let frameCount = 0;
+
+function calculateTPS(currentTime) {    
+    frameCount++;
+    const fps = Math.round(frameCount / (currentTime / 1000));
+    
+    if (frameCount % 60 === 0) {
+        const tpsSpan = document.getElementById('FPS');
+        tpsSpan.textContent = fps;
+    }
+    
+}
+
+
+
+function animate(currentTime) {
+    calculateTPS(currentTime);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#FCEE98';
     ctx.fillRect(0, 0, controlsBar.width, controlsBar.height);
@@ -191,7 +216,7 @@ function createDefenderOption(defenderType, imagePath, cost) {
     image.className = 'defender-image';
     option.appendChild(image);
 
-    if(defenderType != "Pala"){
+    if (defenderType != "Pala") {
         const costText = document.createElement('div');
         costText.textContent = `Cost: ${cost}`;
         option.appendChild(costText);
@@ -261,6 +286,8 @@ function setupSidebar() {
     createDefenderOption('Chiccopulta', './image/plants/Chiccopulta/Chiccopulta.png', 100);
     createDefenderOption('Bananapulta', './image/plants/Banana/ChargedBanana.png', 300);
     createDefenderOption('Cardo', './image/plants/Cardo/Cardo.png', 350);
+    createDefenderOption('Bocca di Drago', './image/plants/BoccaDiDrago/BoccaDiDrago.png', 150);
+    createDefenderOption('Bocca di Drago Fredda', './image/plants/BoccaDiDragoFredda/BoccaDiDragoFredda.png', 150);
 }
 
 setupSidebar();

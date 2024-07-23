@@ -2,12 +2,12 @@
 import { ctx, canvas, cellSize, cellGap, enemies, enemyPositions, gameOver, score, winningScore, frame } from './main.js';
 import { enemiesInterval, numberOfResources } from "./main.js"
 
-export { Enemy, handleEnemies };
+export { Zombie, handleEnemies };
 
 const healthBarHeight = 5;
 let id = 1000;
 
-class Enemy {
+class Zombie {
     constructor(verticalPosition) {
         this.id = id;
         this.x = canvas.width;
@@ -31,7 +31,7 @@ class Enemy {
         this.handleSpeficicEnemies()
     }
 
-    handleSpeficicEnemies(){
+    handleSpeficicEnemies() {
         this.reduceSpeed()
     }
 
@@ -63,7 +63,10 @@ class Enemy {
 
     }
 
-    reduceSpeed(percentage = 0, duration = 0) {
+    reduceSpeed(percentage = 0, duration = 0, enablePiercing = false) {
+        if (enablePiercing) {
+            this.movement = this.speed
+        }
         this.movement *= (1 - percentage);
         this.freezenTime += duration
 
@@ -78,6 +81,61 @@ class Enemy {
 
     }
 }
+
+class ConeHeadZombie extends Zombie {
+    constructor(verticalPosition) {
+        super(verticalPosition);
+        this.health = 200;
+        this.maxHealth = this.health;
+        this.damage = 0.6;
+        this.image.src = './image/zombie/ConeheadZombie/ConeheadZombie.png';
+    }
+}
+
+
+class BucketHeadZombie extends Zombie {
+    constructor(verticalPosition) {
+        super(verticalPosition);
+        this.health = 300;
+        this.maxHealth = this.health;
+        this.damage = 1;
+        this.image.src = './image/zombie/BucketheadZombie/BucketheadZombie.png';
+    }
+}
+
+class FlagZombie extends Zombie {
+    constructor(verticalPosition) {
+        super(verticalPosition);
+        this.health = 150;
+        this.maxHealth = this.health;
+        this.damage = 0.4;
+        this.image.src = './image/zombie/FlagZombie/FlagZombie.png';
+    }
+}
+
+class FootballZombie extends Zombie {
+    constructor(verticalPosition) {
+        super(verticalPosition);
+        this.health = 500;
+        this.maxHealth = this.health;
+        this.damage = 1.5;
+        this.image.src = './image/zombie/FootballZombie/FootballZombie.png';
+    }
+}
+
+class NewspaperZombie extends Zombie {
+    constructor(verticalPosition) {
+        super(verticalPosition);
+        this.health = 200;
+        this.maxHealth = this.health;
+        this.damage = 0.6;
+        this.image.src = './image/zombie/NewspaperZombie/NewspaperZombie.png';
+    }
+}
+
+
+
+const EnememyTypes = { Zombie, ConeHeadZombie, BucketHeadZombie, FlagZombie, FootballZombie, NewspaperZombie }
 
 function handleEnemies() {
     for (let i = 0; i < enemies.length; i++) {
@@ -98,7 +156,9 @@ function handleEnemies() {
     }
     if (frame.frame % enemiesInterval.enemiesInterval === 0 && score.score < winningScore) {
         let verticalPosition = Math.floor(Math.random() * 5 + 1) * cellSize + cellGap;
-        enemies.push(new Enemy(verticalPosition));
+        const enemyTypeKeys = Object.keys(EnememyTypes);
+        const randomEnemyType = enemyTypeKeys[Math.floor(Math.random() * enemyTypeKeys.length)];
+        enemies.push(new EnememyTypes[randomEnemyType](verticalPosition));
         id++;
         enemyPositions.push(verticalPosition);
         if (enemiesInterval.enemiesInterval > 120) enemiesInterval.enemiesInterval -= 50;

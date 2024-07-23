@@ -411,7 +411,7 @@ class SparasemiDellEraGlaciale extends Sparasemi {
 
 class PiantaDaHacker extends Sparasemi {
     constructor(x, y) {
-        super(x, y, Infinity, 0, './image/plants/PiantaDaHacker/PiantaDaHacker.png')
+        super(x, y, 1000000000, 0, './image/plants/PiantaDaHacker/PiantaDaHacker.png')
         this.power = 75;
         this.projectileSpeed = 15;
         this.shootingFrequency = 10;
@@ -1294,10 +1294,10 @@ class Cardo extends Defender {
         return { m, q };
     }
 
-    FindDirection(P, T){
-        if(P.x <= T.x){
+    FindDirection(P, T) {
+        if (P.x <= T.x) {
             return 1
-        }else{
+        } else {
             return -1
         }
     }
@@ -1375,6 +1375,132 @@ class Cardo extends Defender {
     }
 }
 
+class BoccaDiDrago extends Defender {
+    constructor(x, y) {
+        super(x, y, 600, 150, './image/plants/BoccaDiDrago/BoccaDiDrago.png');
+        this.power = 20;
+        this.projectileSpeed = 2;
+        this.shootingFrequency = 70;
+        this.timer = 0;
+        this.shooting = true;
+        this.cooldown = 5500;
+
+        this.projectileHeight = 100
+        this.projectileWidth = 30
+        this.projectileImage = "./image/plants/BoccaDiDrago/Projectile.png"
+
+        this.xOffsetProjectile = 30 - cellGap;
+        this.distance = 2 * cellSize - cellGap + (cellSize - this.xOffsetProjectile) - this.projectileWidth;
+    }
+
+    Trajectory(x, y) {
+        return { x: x + this.projectileSpeed, y: y };
+    }
+
+
+    handleShootingBehavior() {
+        this.shooting = true
+        if (this.shooting) {
+            this.timer++;
+            if (this.timer % this.shootingFrequency === 0) {
+                let targetEnemy = [];
+                for (let i = 0; i < enemies.length; i++) {
+                    if (this.collision(this, enemies[i])) {
+                        targetEnemy.push(enemies[i]);
+                    }
+                }
+
+                if (targetEnemy.length > 0) {
+                    for (let i = -100; i <= 100; i += 100) {
+                        if ((this.y - cellGap + i < cellSize) || (this.y - cellGap + i >= canvas.width)) {
+                            continue;
+                        }
+                        let newProjectile = new Projectile(
+                            this,
+                            this.x + this.xOffsetProjectile,
+                            this.y - cellGap + i,
+                            (x, y) => this.Trajectory(x, y),
+                            this.power,
+                            this.projectileImage,
+                            this.distance
+                        );
+                        newProjectile.enablePiercing = true
+                        newProjectile.piercingNumber = Infinity
+                        newProjectile.width = this.projectileWidth;
+                        newProjectile.height = this.projectileHeight;
+                        projectiles.push(newProjectile);
+
+                    }
+                }
+
+
+            }
+        } else {
+            this.timer = 0;
+        }
+    }
+
+    handleTypeSpecificBehavior() {
+        this.handleShootingBehavior()
+        this.shooting = true
+    }
+
+
+    collision(defender, enemy) {
+        if (
+            ((enemy.x < defender.x - cellGap + 3 * cellSize) && (enemy.x >= defender.x + 0.5 * cellSize) && (((defender.y - cellSize - cellGap) <= enemy.y) && ((defender.y + 2 * cellSize - cellGap) > (enemy.y + enemy.height))))
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+
+
+}
+
+class BoccaDiDragoFredda extends BoccaDiDrago {
+    constructor(x, y) {
+        super(x, y, 600, 150, './image/plants/BoccaDiDragoFredda/BoccaDiDragoFredda.png');
+        this.image.src = './image/plants/BoccaDiDragoFredda/BoccaDiDragoFredda.png'
+        this.power = 10;
+        this.projectileSpeed = 2;
+        this.shootingFrequency = 70;
+        this.timer = 0;
+        this.shooting = true;
+        this.cooldown = 5500;
+
+        this.projectileHeight = 100
+        this.projectileWidth = 70
+
+        this.xOffsetProjectile = 30 - cellGap;
+        this.distance = 2 * cellSize - cellGap + (cellSize - this.xOffsetProjectile) - this.projectileWidth;
+
+        this.projectileImage = "./image/plants/BoccaDiDragoFredda/Projectile.png"
+
+        this.freezeDuration = 100
+        this.reductionSpeed = 0.4
+    }
+
+    freezeFire(){
+        for(let i = 0; i < projectiles.length; i++){
+            if(projectiles[i].parents == this){
+                for(let j = 0; j < enemies.length; j++){
+                    if(collision(enemies[j], projectiles[i])){
+                        enemies[j].reduceSpeed(this.reductionSpeed, this.freezeDuration, true)
+                    }
+                }
+            }
+        }
+    }
+
+    handleTypeSpecificBehavior() {
+        this.handleShootingBehavior()
+        this.freezeFire()
+        this.shooting = true
+    }
+}
+
 function createDefender(x, y, id, resources) {
 
     let newDefender;
@@ -1449,6 +1575,14 @@ function createDefender(x, y, id, resources) {
         }
         case "Cardo": {
             newDefender = new Cardo(x, y);
+            break;
+        }
+        case "Bocca di Drago": {
+            newDefender = new BoccaDiDrago(x, y);
+            break;
+        }
+        case "Bocca di Drago Fredda": {
+            newDefender = new BoccaDiDragoFredda(x, y);
             break;
         }
 
